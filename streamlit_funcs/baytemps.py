@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from scipy import stats
 import streamlit as st
 
 def doy(month,day):
@@ -52,6 +53,20 @@ def import_data():
     return d
 
 @st.cache_data
+def outlier_detection(df, measurement_column="temp", group_column="doy", z_thresh=3.5):
+    #calculate mean temperature for each day of year
+    mean_temps=df.groupby(group_column)[measurement_column].transform("mean")
+    #calculate z score for temperatures within each day of year
+    df["zscore"]=df.groupby(group_column)[measurement_column].transform(lambda x: stats.zscore(x, nan_policy="omit"))
+    #outlier detection
+    outliers=np.abs(df.zscore)>z_thresh
+    outliers_df = df.copy(deep=True).loc[outliers,:]
+    #replace outliers
+    df.loc[outliers, measurement_column]=mean_temps[outliers]
+    return df, outliers_df
+
+
+@st.cache_data
 def average_daily_data(data: pd.DataFrame):
     """
     Takes the raw hourly temperature data and summarizes it into daily averages
@@ -79,7 +94,7 @@ def average_daily_data(data: pd.DataFrame):
 @st.cache_data
 def garmin_data():
 
-    """Pulls data from a personal garmin watch database and formats it to match the NOAA temperature data."""
+    """Pulls data from a personal garmin watch database and formats it to match the NOAA temperature data. Also applies a 5 day rolling average to smooth out the noise"""
 
     conn=st.connection("mysql", type='sql')
     

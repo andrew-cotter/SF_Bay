@@ -26,10 +26,16 @@ st.markdown(""":red[
             Therefore, the 2024 temperature data is comprised of minimum temperatures collected by my Garmin watch on the days that I swim.
             ]""")
 
+#Read in historial data (NOAA)
 d = pd.read_csv("up_to_2024.csv")
 d["source"]="NOAA"
+
+#Read in garmin data
 d2=bt.garmin_data()
 d=pd.concat([d, d2])
+
+#Outlier detection and produce summaries
+d, outliers = bt.outlier_detection(d)
 daily_average, da2 = bt.average_daily_data(data = d)
 
 # df = bt.import_data()
@@ -80,12 +86,12 @@ interval_data = pd.DataFrame(
 #Imputing missing values (average temperature from all other years)
 interval_data = interval_data.fillna(interval_data.mean())
 
+#Interactive plotting
 year = st.number_input(
-    label = "Enter a year between 1994 and 2023",
+    label = "Enter a year between 1994 and 2024",
     min_value = 1994, max_value = 2024, 
     value = 2024
 )
-
 fig, ax = plt.subplots(figsize = (9,6))
 #Creating the 90% interval shaded region
 az.plot_hdi(
@@ -131,11 +137,10 @@ ax.legend()
 plt.xticks(rotation = 45)
 st.pyplot(fig)
 
+year_outliers=outliers.loc[outliers.year==year]
+if len(year_outliers.index)>0:
+    with st.expander(f"Outliers in {year}"):
+        st.write("The following data points in this year were detected as outliers and corrected to the average temperature for that day of the year:")
+        st.write(year_outliers.drop_duplicates().reset_index(drop=True))
+
 st.markdown("Data from [NOAA Tides & Currents](https://tidesandcurrents.noaa.gov/stationhome.html?id=9414290) and my personal Garmin Watch.")
-
-
-# time = d[(d.year==year)&(d.month==4)].groupby("time").mean().reset_index()
-# fig,ax = plt.subplots()
-# ax.scatter(x = time.time, y = time.temp)
-# plt.xticks(rotation = 45)
-# st.pyplot(fig)

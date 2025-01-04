@@ -23,7 +23,7 @@ st.write("## San Francisco Bay Water Temperature")
 
 st.markdown(""":red[
             The NOAA temperature gauge has been offline for most of 2024 due to it being buried in the sand.
-            Therefore, the 2024 temperature data is comprised of minimum temperatures collected by my Garmin watch on the days that I swim.
+            Therefore, the temperature data since then is comprised of minimum temperatures collected by my Garmin watch on the days that I swim.
             ]""")
 
 #Read in historial data (NOAA)
@@ -78,7 +78,7 @@ st.write("## Yearly trends")
 #Creating a year x day matrix of mean temperature values for use in the az.plot_hdi function
 interval_data = pd.DataFrame(
     daily_average.loc[
-        daily_average.year<=2024,:
+        daily_average.year<=2025,:
     ].pivot_table(
         index = "year",columns = "doy", values = "Mean"
         )
@@ -88,9 +88,9 @@ interval_data = interval_data.fillna(interval_data.mean())
 
 #Interactive plotting
 year = st.number_input(
-    label = "Enter a year between 1994 and 2024",
-    min_value = 1994, max_value = 2024, 
-    value = 2024
+    label = "Enter a year between 1994 and 2025",
+    min_value = 1994, max_value = 2025, 
+    value = 2025
 )
 fig, ax = plt.subplots(figsize = (9,6))
 #Creating the 90% interval shaded region

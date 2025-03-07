@@ -99,7 +99,8 @@ def garmin_data():
     conn=st.connection("mysql", type='sql')
     
     query = "SELECT startTimeLocal date, minTemperature*1.8+32 temp FROM garmin.activities\
-        WHERE activityName = 'San Francisco County Open Water Swimming'\
+        WHERE activityName LIKE 'San Francisco%' \
+        AND activityName LIKE '%Open Water Swimming'\
         AND elapsedDuration/3600 > 0.25\
         AND minTemperature IS NOT NULL\
     "

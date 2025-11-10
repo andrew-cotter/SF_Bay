@@ -98,7 +98,7 @@ def garmin_data():
 
     conn=st.connection("mysql", type='sql')
     
-    query = "SELECT startTimeLocal date, minTemperature*1.8+32 temp FROM garmin.activities\
+    query = "SELECT startTimeLocal date, minTemperature*1.8+32 temp FROM defaultdb.activities\
         WHERE activityName LIKE 'San Francisco%' \
         AND activityName LIKE '%Open Water Swimming'\
         AND elapsedDuration/3600 > 0.25\

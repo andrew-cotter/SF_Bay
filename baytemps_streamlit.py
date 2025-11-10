@@ -53,22 +53,19 @@ st.write(
     " at "+str(d.iloc[-1,2])+" Pacific Time" #Time
     )
 
-#Metrics
-try:
-    todays_average = daily_average.iloc[-1,5]
-    yesterdays_average = daily_average.iloc[-2,5]
-    last_week_average = daily_average.iloc[[-8,-9,-10,-11,-12,-13,-14,-15],5].mean()
-    day_delta = (todays_average - yesterdays_average).round(1)
-    week_delta = (todays_average - last_week_average).round(1)
-    col1,col2,col3 = st.columns(3)
-    with col1:
-        st.metric("Today's Average Temperature", str(todays_average.round(1))+"\N{DEGREE SIGN}F")
-    with col2:
-        st.metric("Yesterday's Average Temperature", str(yesterdays_average.round(1))+"\N{DEGREE SIGN}F", day_delta)
-    with col3:
-        st.metric("Last Week's Average Temperature", str(last_week_average.round(1))+"\N{DEGREE SIGN}F", week_delta)
-except:
-    pass
+temp_col = 6
+todays_average = daily_average.iloc[-1,temp_col]
+yesterdays_average = daily_average.iloc[-2,temp_col]
+last_week_average = daily_average.iloc[-7,temp_col]
+day_delta = (todays_average - yesterdays_average).round(1)
+week_delta = (todays_average - last_week_average).round(1)
+col1,col2,col3 = st.columns(3)
+with col1:
+    st.metric("Today's Average Temperature", str(todays_average.round(1))+"\N{DEGREE SIGN}F")
+with col2:
+    st.metric("Yesterday's Average Temperature", str(yesterdays_average.round(1))+"\N{DEGREE SIGN}F", day_delta)
+with col3:
+    st.metric("7 Days Ago", str(last_week_average.round(1))+"\N{DEGREE SIGN}F", week_delta)
 
 
 st.markdown("""---""")

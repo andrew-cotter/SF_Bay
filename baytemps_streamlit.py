@@ -75,7 +75,7 @@ st.write("## Yearly trends")
 #Creating a year x day matrix of mean temperature values for use in the az.plot_hdi function
 interval_data = pd.DataFrame(
     daily_average.loc[
-        daily_average.year<=2025,:
+        daily_average.year<=2026,:
     ].pivot_table(
         index = "year",columns = "doy", values = "Mean"
         )
@@ -85,9 +85,9 @@ interval_data = interval_data.fillna(interval_data.mean())
 
 #Interactive plotting
 year = st.number_input(
-    label = "Enter a year between 1994 and 2025",
-    min_value = 1994, max_value = 2025, 
-    value = 2025
+    label = "Enter a year between 1994 and 2026",
+    min_value = 1994, max_value = 2026, 
+    value = 2026
 )
 fig, ax = plt.subplots(figsize = (9,6))
 #Creating the 90% interval shaded region

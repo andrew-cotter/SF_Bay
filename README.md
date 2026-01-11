@@ -19,7 +19,7 @@ This repository contains tools and analyses for monitoring and visualizing San F
 
 ## 🚀 Live Demo
 
-The interactive dashboard is available online at
+The interactive dashboard is available online at:
 **[https://sfbaytemp.streamlit.app](https://sfbaytemp.streamlit.app)**
 
 ## 📊 Data Sources

@@ -7,7 +7,7 @@ def doy(month,day):
     months = [31,28,31,30,31,30,31,31,30,31,30,31]
     return sum(months[0:month-1])+day
 
-@st.cache_data(ttl = 60*60)
+@st.cache_data(ttl = 3600)
 def import_data():
     """
     An argument-less function that imports all of the hourly SF Bay water data
@@ -91,7 +91,7 @@ def average_daily_data(data: pd.DataFrame):
 
     return daily_average, da2
 
-@st.cache_data
+@st.cache_data(ttl=3600)
 def garmin_data():
 
     """Pulls data from a personal garmin watch database and formats it to match the NOAA temperature data. Also applies a 5 day rolling average to smooth out the noise"""

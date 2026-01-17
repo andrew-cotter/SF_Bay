@@ -6,7 +6,6 @@ import arviz as az
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-from datetime import datetime as dt
 
 st.set_page_config(layout = "centered")
 st.write("## San Francisco Bay Water Temperature")
@@ -98,11 +97,13 @@ az.plot_hdi(
 #Average daily temperatures across all years
 plt.plot(da2.doy, da2.Mean, label = "Average (1994-2023)", linestyle = "--")
 
-for year_trace in daily_average.year.unique():
+
+for _, group in daily_average.groupby(['year', 'source']):
     plt.plot(
-        daily_average.loc[daily_average.year == year_trace,"doy"],
-        daily_average.loc[daily_average.year == year_trace,"Mean"], 
-        color = "Grey", alpha = 0.1
+        group["doy"], 
+        group["Mean"], 
+        color="Grey", 
+        alpha=0.1
     )
 
 source_colors = {'Garmin': 'blue', 'NOAA': 'teal'} 

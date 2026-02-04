@@ -4,3 +4,4 @@ Data/.DS_Store
 streamlit_funcs/__pycache__
 .streamlit/secrets.toml
 .devcontainer/
+.ruff_cache/

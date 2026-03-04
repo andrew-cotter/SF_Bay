@@ -88,9 +88,9 @@ def render_metrics(daily_average):
     # Smaller metrics on one line: yesterday and 7 days ago (same style, smaller)
     def delta_text_and_color(delta, period):
         if delta > 0:
-            return f"↑{abs(delta)}°F from {period} 🔥", "red"
+            return f"↗ {abs(delta)}°F from {period} 🔥", "red"
         elif delta < 0:
-            return f"↓{abs(delta)}°F from {period} ❄️", "blue"
+            return f"↘ {abs(delta)}°F from {period} ❄️", "blue"
         else:
             return f"Unchanged from {period}", "white"
 

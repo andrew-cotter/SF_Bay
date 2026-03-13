@@ -135,9 +135,9 @@ def plot_yearly_trends(daily_average, da2, interval_data, year):
         x=da2.doy,
         y=interval_data,
         hdi_prob=0.9,
-        fill_kwargs={"label": "5th-95th Percentile (1994-2023)"},
+        fill_kwargs={"label": "Typical Range"},
     )
-    plt.plot(da2.doy, da2.Mean, label="Average (1994-2023)", linestyle="--")
+    plt.plot(da2.doy, da2.Mean, label="Historical Average (1994-2023)", linestyle="--")
 
     for _, group in daily_average.groupby(["year", "source"]):
         plt.plot(group["doy"], group["Mean"], color="Grey", alpha=0.1)
@@ -150,7 +150,7 @@ def plot_yearly_trends(daily_average, da2, interval_data, year):
             plt.plot(
                 data["doy"], data["Mean"],
                 color=SOURCE_COLORS[source],
-                label=source,
+                label= f" {year}: {source}",
                 alpha=0.7,
             )
 

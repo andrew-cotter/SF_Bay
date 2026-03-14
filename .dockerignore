@@ -1,0 +1,11 @@
+venv/
+.git/
+.gitignore
+*.pyc
+__pycache__/
+.ruff_cache/
+.devcontainer/
+.streamlit/secrets.toml
+.DS_Store
+*.md
+*.ipynb

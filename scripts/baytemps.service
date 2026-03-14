@@ -1,0 +1,37 @@
+# Systemd unit for baytemps on EC2.
+# Fetches MySQL credentials from Secrets Manager and runs the Docker container.
+#
+# Install:
+#   sudo cp baytemps.service /etc/systemd/system/
+#   sudo nano /etc/systemd/system/baytemps.service   # set SECRET_ID, AWS_REGION, path to script
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable baytemps
+#   sudo systemctl start baytemps
+#
+# Requirements:
+#   - Script at /opt/baytemps/ec2-start-baytemps.sh (copy from repo scripts/)
+#   - Docker + jq on the instance; EC2 IAM role with secretsmanager:GetSecretValue
+#   - Image available as baytemps:latest or set Environment=DOCKER_IMAGE=...
+
+[Unit]
+Description=Bay temps Streamlit app (Docker)
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+
+# Set these to match your Secrets Manager secret and region
+Environment=SECRET_ID=your-secret-name
+Environment=AWS_REGION=us-east-1
+# Optional: if image is from ECR use full URI
+# Environment=DOCKER_IMAGE=123456789012.dkr.ecr.us-east-1.amazonaws.com/baytemps:latest
+# If docker requires sudo:
+# Environment=DOCKER_CMD=sudo docker
+
+ExecStart=/opt/baytemps/ec2-start-baytemps.sh
+WorkingDirectory=/opt/baytemps
+
+[Install]
+WantedBy=multi-user.target

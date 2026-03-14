@@ -134,6 +134,58 @@ The analysis includes:
 - **NumPy/SciPy**: Numerical computations
 - **MySQL**: Garmin watch data storage (via Streamlit connections)
 
+### Secrets (Docker / production)
+
+The app uses `st.connection("mysql", type="sql")`, which reads `[connections.mysql]` from `.streamlit/secrets.toml`. For Docker or AWS you can supply secrets in any of these ways:
+
+1. **Environment variables (recommended)**  
+   The image’s entrypoint builds `secrets.toml` from env vars when `MYSQL_HOST` is set. Set:
+   - `MYSQL_HOST`, `MYSQL_USER`, `MYSQL_PASSWORD`
+   - Optional: `MYSQL_PORT` (default 3306), `MYSQL_DATABASE` (default `defaultdb`), `MYSQL_QUERY_CHARSET`  
+   Example: `docker run -e MYSQL_HOST=... -e MYSQL_USER=... -e MYSQL_PASSWORD=... -p 8501:8501 baytemps`  
+   On ECS/App Runner, pass these from **AWS Secrets Manager** (e.g. store a JSON and map keys to env) or **Systems Manager Parameter Store**.
+
+2. **Mount a secrets file**  
+   Build `.streamlit/secrets.toml` locally (or from a secret manager) and mount it:
+   `docker run -v /path/to/secrets.toml:/app/.streamlit/secrets.toml -p 8501:8501 baytemps`
+
+3. **AWS Secrets Manager at startup**  
+   Use an IAM role and a small script that fetches the secret (e.g. `aws secretsmanager get-secret-value`), writes `.streamlit/secrets.toml`, then runs the Streamlit command. The current entrypoint only handles env vars; extend it or run a wrapper script if you prefer fetch-from-Secrets-Manager.
+
+### EC2 deployment (Secrets Manager)
+
+**New to this?** There’s a **step-by-step walkthrough** that explains why the app needs secrets and exactly what to run on EC2: **[docs/EC2-SETUP-WALKTHROUGH.md](docs/EC2-SETUP-WALKTHROUGH.md)**. Do that first if you’re unsure.
+
+The repo includes scripts to run the app on EC2 using credentials stored in **AWS Secrets Manager**.
+
+**Prerequisites on the EC2 instance:**
+
+- IAM role with `secretsmanager:GetSecretValue` on your secret
+- Docker installed and running (`sudo usermod -aG docker ec2-user` then log out/in so you can run `docker` without sudo)
+- `jq` installed (`sudo yum install -y jq` or `sudo apt install -y jq`)
+- Docker image available (build locally or pull from ECR)
+
+**Secret format in Secrets Manager:** JSON with keys `host`, `port`, `username`, `password`, `database`. If your secret uses different key names, set the `SECRET_KEY_*` env vars when running the script (see script header).
+
+**One-time run:**
+
+```bash
+# Copy script to the instance (e.g. to /opt/baytemps), then:
+chmod +x /opt/baytemps/ec2-start-baytemps.sh
+SECRET_ID=your-secret-name AWS_REGION=us-east-1 /opt/baytemps/ec2-start-baytemps.sh
+```
+
+If you need `sudo` for Docker: `DOCKER_CMD=sudo docker SECRET_ID=... AWS_REGION=... ./ec2-start-baytemps.sh`
+
+**Run on every boot (systemd):**
+
+1. Copy `scripts/ec2-start-baytemps.sh` and `scripts/baytemps.service` to the instance.
+2. Put the script in `/opt/baytemps/` and run `chmod +x /opt/baytemps/ec2-start-baytemps.sh`.
+3. Edit the service file: set `Environment=SECRET_ID=...` and `Environment=AWS_REGION=...` (and optionally `DOCKER_IMAGE` if using ECR).
+4. Install the unit: `sudo cp baytemps.service /etc/systemd/system/` then `sudo systemctl daemon-reload && sudo systemctl enable baytemps && sudo systemctl start baytemps`.
+
+After startup, the app is available on port **8501**; ensure the instance security group allows inbound traffic on that port.
+
 ## 📝 Notes
 
 - The NOAA buoy temperature readings are typically 1-2°F warmer than temperatures experienced in Aquatic Park Cove (a popular swimming location)

@@ -1,0 +1,53 @@
+# Build the Docker image, push to Amazon ECR, and deploy to EC2 on every push to main.
+# One-time setup: see docs/DEPLOY-SETUP.md
+
+name: Build and deploy
+
+on:
+  push:
+    branches: [master]
+
+env:
+  ECR_REPOSITORY: baytemps   # ECR repo name (create in AWS Console)
+  IMAGE_TAG: latest
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push image
+        id: build
+        env:
+          ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+          ECR_URI: ${{ steps.ecr-login.outputs.registry }}/${{ env.ECR_REPOSITORY }}
+        run: |
+          docker build -t $ECR_URI:$IMAGE_TAG .
+          docker push $ECR_URI:$IMAGE_TAG
+          echo "image=$ECR_URI:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ec2-user
+          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+          script: |
+            set -e
+            aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | sudo docker login --username AWS --password-stdin ${{ steps.ecr-login.outputs.registry }}
+            sudo docker pull ${{ steps.build.outputs.image }}
+            cd /opt/baytemps && DOCKER_CMD="sudo docker" DOCKER_IMAGE=${{ steps.build.outputs.image }} SECRET_ID=${{ secrets.SECRET_ID }} AWS_REGION=${{ secrets.AWS_REGION }} ./ec2-start-baytemps.sh
+          script_stop: true

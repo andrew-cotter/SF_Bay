@@ -134,12 +134,19 @@ The script will run a container from an image named **`baytemps:latest`** by def
 
 **If you build the image on this EC2 instance:**
 
-- Copy the **whole repo** onto the instance (e.g. `git clone` or `scp` the project folder), then on the instance:
+- Install git if needed (Amazon Linux: `sudo yum install -y git`), then clone the repo and build:
 
 ```bash
-cd /path/to/SF_Bay
+sudo yum install -y git
+cd /tmp
+git clone https://github.com/YOUR_USERNAME/SF_Bay.git
+cd SF_Bay
 docker build -t baytemps:latest .
 ```
+
+Replace `YOUR_USERNAME/SF_Bay` with your actual repo URL. Ensure `up_to_2024.csv` is committed and pushed so the build has the data file.
+
+- Or copy the repo with `scp` from your Mac (no git on EC2 needed); see the troubleshooting section if the image is missing.
 
 (You need the Dockerfile and app code there; the Dockerfile is in the repo root.)
 

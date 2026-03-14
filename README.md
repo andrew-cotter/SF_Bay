@@ -186,6 +186,10 @@ If you need `sudo` for Docker: `DOCKER_CMD=sudo docker SECRET_ID=... AWS_REGION=
 
 After startup, the app is available on port **8501**; ensure the instance security group allows inbound traffic on that port.
 
+### Auto deploy on push (production)
+
+To rebuild the Docker image and deploy to EC2 **on every push to main**, see **[docs/DEPLOY-SETUP.md](docs/DEPLOY-SETUP.md)**. You’ll create an ECR repo, add GitHub Actions secrets (AWS credentials, EC2 host, SSH key, secret name), and ensure the EC2 role can pull from ECR. After that, pushing to `main` runs the workflow and updates the running app.
+
 ## 📝 Notes
 
 - The NOAA buoy temperature readings are typically 1-2°F warmer than temperatures experienced in Aquatic Park Cove (a popular swimming location)

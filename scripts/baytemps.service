@@ -23,12 +23,8 @@ Type=oneshot
 RemainAfterExit=yes
 
 # Set these to match your Secrets Manager secret and region
-Environment=SECRET_ID=your-secret-name
-Environment=AWS_REGION=us-east-1
-# Optional: if image is from ECR use full URI
-# Environment=DOCKER_IMAGE=123456789012.dkr.ecr.us-east-1.amazonaws.com/baytemps:latest
-# If docker requires sudo:
-# Environment=DOCKER_CMD=sudo docker
+Environment=SECRET_ID=mysql_secret
+Environment=AWS_REGION=us-east-2
 
 ExecStart=/opt/baytemps/ec2-start-baytemps.sh
 WorkingDirectory=/opt/baytemps

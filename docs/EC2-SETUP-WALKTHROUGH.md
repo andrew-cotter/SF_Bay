@@ -1,5 +1,3 @@
-/Users/andrewcotter/Downloads/baytemps-keypair.pem ec2-user@18.116.204.200
-
 # EC2 setup walkthrough (step by step)
 
 This guide gets the Bay temps app running on your EC2 instance **with** your MySQL credentials coming from AWS Secrets Manager. No secrets in code or on disk that you have to edit by hand.
@@ -8,7 +6,7 @@ This guide gets the Bay temps app running on your EC2 instance **with** your MyS
 
 ## Why the app breaks without secrets.toml
 
-- The app connects to MySQL using `st.connection("mysql", ...)`, which reads from a file: **`.streamlit/secrets.toml`**.
+- The app connects to MySQL using `st.connection("mysql", ...)`, which reads from a file: `**.streamlit/secrets.toml`**.
 - That file is **not** in the Docker image (it’s ignored so we don’t put real passwords in the image).
 - When the container **starts**, the **entrypoint** can **create** that file — but only if it sees **environment variables** like `MYSQL_HOST`, `MYSQL_USER`, `MYSQL_PASSWORD`, etc.
 - So we need to: **get the secret from AWS → turn it into env vars → run the container with those env vars**. Then the entrypoint writes `secrets.toml` inside the container and the app works.
@@ -38,10 +36,17 @@ From your own computer (Terminal or PowerShell), SSH in. You need the key you us
 ssh -i /path/to/your-key.pem ec2-user@YOUR_EC2_PUBLIC_IP
 ```
 
-- Amazon Linux often uses user **`ec2-user`**.
-- Ubuntu often uses user **`ubuntu`**.
+- Amazon Linux often uses user `**ec2-user**`.
+- Ubuntu often uses user `**ubuntu**`.
 
 If you’re in, you’ll see a prompt like `[ec2-user@ip-172-31-… ~]$`. The rest of the steps are run **on this SSH session** (on the EC2 instance).
+
+
+
+Or use 
+```bash 
+ssh baytemps
+```
 
 ---
 
@@ -87,7 +92,7 @@ Again, log out and back in over SSH after `usermod`.
 
 ## Step 3: Put the startup script on the instance
 
-You need the script **`scripts/ec2-start-baytemps.sh`** from this repo on the EC2 instance. Two ways:
+You need the script `**scripts/ec2-start-baytemps.sh**` from this repo on the EC2 instance. Two ways:
 
 **Option A – Copy from your computer (recommended)**
 
@@ -130,7 +135,7 @@ sudo chown -R ec2-user:ec2-user /opt/baytemps
 
 ## Step 4: Get the Docker image on the instance
 
-The script will run a container from an image named **`baytemps:latest`** by default. So the instance must have that image.
+The script will run a container from an image named `**baytemps:latest**` by default. So the instance must have that image.
 
 **If you build the image on this EC2 instance:**
 
@@ -170,8 +175,8 @@ On the EC2 instance, run the script **once**. You must tell it the **name of you
 
 Replace:
 
-- **`your-secret-name`** with the real name of your MySQL secret in AWS (e.g. `prod/mysql/baytemps`).
-- **`us-east-1`** with the region where that secret lives.
+- `**your-secret-name`** with the real name of your MySQL secret in AWS (e.g. `prod/mysql/baytemps`).
+- `**us-east-1**` with the region where that secret lives.
 
 **Run:**
 
@@ -202,11 +207,11 @@ What this does:
 docker ps
 ```
 
-You should see a container named **`baytemps`** with port **8501** mapped.
+You should see a container named `**baytemps**` with port **8501** mapped.
 
 - From your **browser**, open:
 
-**`http://YOUR_EC2_PUBLIC_IP:8501`**
+`**http://YOUR_EC2_PUBLIC_IP:8501`**
 
 You should see the Bay temps dashboard. If it loads but MySQL data is missing, check that the secret’s JSON has the keys the script expects: `host`, `port`, `username`, `password`, `database`. If your secret uses different key names, see the script’s comments for the `SECRET_KEY_*` variables.
 
@@ -217,22 +222,18 @@ You should see the Bay temps dashboard. If it loads but MySQL data is missing, c
 ## If something goes wrong
 
 - **“SECRET_ID or first argument required”**  
-  You didn’t set `SECRET_ID`. Run again with  
-  `SECRET_ID=your-secret-name AWS_REGION=us-east-1 ./ec2-start-baytemps.sh`
-
+You didn’t set `SECRET_ID`. Run again with  
+`SECRET_ID=your-secret-name AWS_REGION=us-east-1 ./ec2-start-baytemps.sh`
 - **“Access Denied” or permission errors from AWS**  
-  The instance’s IAM role doesn’t have `secretsmanager:GetSecretValue` for that secret. Add a policy that allows it and attach it to the instance role.
-
+The instance’s IAM role doesn’t have `secretsmanager:GetSecretValue` for that secret. Add a policy that allows it and attach it to the instance role.
 - **“jq: command not found”**  
-  Install jq (Step 2).
-
+Install jq (Step 2).
 - **“docker: command not found” or “permission denied” for Docker**  
-  Install Docker and add your user to the `docker` group, then log out and back in (Step 2). Or use `DOCKER_CMD=sudo docker` when running the script.
-
+Install Docker and add your user to the `docker` group, then log out and back in (Step 2). Or use `DOCKER_CMD=sudo docker` when running the script.
 - **Container exits immediately / app still says no secrets**  
-  Check the container logs:  
-  `docker logs baytemps`  
-  If the entrypoint doesn’t see `MYSQL_HOST`, it won’t write `secrets.toml`. Make sure the script ran without errors and that the secret’s JSON has the expected keys so the env file is correct.
+Check the container logs:  
+`docker logs baytemps`  
+If the entrypoint doesn’t see `MYSQL_HOST`, it won’t write `secrets.toml`. Make sure the script ran without errors and that the secret’s JSON has the expected keys so the env file is correct.
 
 ---
 

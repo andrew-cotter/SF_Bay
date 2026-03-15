@@ -171,7 +171,11 @@ def plot_yearly_trends(daily_average, da2, interval_data, year):
 # -----------------------------------------------------------------------------
 
 def main():
-    st.set_page_config(layout="centered")
+    st.set_page_config(
+        layout="centered",
+        page_title="San Francisco Bay Water Temperature",
+        page_icon=":ocean:",
+        )
     st.write("## San Francisco Bay Water Temperature")
 
     d, daily_average, da2, outliers = load_data()

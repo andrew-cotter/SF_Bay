@@ -12,9 +12,10 @@ if [[ -n "${MYSQL_HOST:-}" ]]; then
   cat > .streamlit/secrets.toml << EOF
 [connections.mysql]
 dialect = "mysql"
+driver = "pymysql"
 host = "${MYSQL_HOST}"
 port = ${MYSQL_PORT:-3306}
-database = "${MYSQL_DATABASE:-defaultdb}"
+dbname = "${MYSQL_DATABASE:-defaultdb}"
 username = "${MYSQL_USER}"
 password = "${MYSQL_PASSWORD}"
 ${QUERY_LINE}

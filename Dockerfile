@@ -4,12 +4,9 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-# System deps: healthcheck, and for building mysqlclient (MySQLdb)
+# System deps for healthcheck only (PyMySQL is pure Python, no build deps)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
-    default-libmysqlclient-dev \
-    build-essential \
-    pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python deps first for better layer caching

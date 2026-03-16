@@ -136,7 +136,7 @@ The analysis includes:
 
 ### Secrets (Docker / production)
 
-The app uses `st.connection("mysql", type="sql")`, which reads `[connections.mysql]` from `.streamlit/secrets.toml`. For Docker or AWS you can supply secrets in any of these ways:
+The app uses `st.connection("mysql", type="sql")`, which reads `[connections.mysql]` from `.streamlit/secrets.toml`. The app uses **PyMySQL** (no mysqlclient), so it runs on both **Streamlit Community Cloud** and Docker/EC2. For Community Cloud, set a single URL in the app’s Secrets: `url = "mysql+pymysql://USER:PASSWORD@HOST:PORT/DATABASE"`. For Docker or AWS you can supply secrets in any of these ways:
 
 1. **Environment variables (recommended)**  
    The image’s entrypoint builds `secrets.toml` from env vars when `MYSQL_HOST` is set. Set:

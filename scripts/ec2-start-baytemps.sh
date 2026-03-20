@@ -33,7 +33,7 @@ SECRET_KEY_HOST="${SECRET_KEY_HOST:-host}"
 SECRET_KEY_PORT="${SECRET_KEY_PORT:-port}"
 SECRET_KEY_USER="${SECRET_KEY_USER:-username}"
 SECRET_KEY_PASS="${SECRET_KEY_PASS:-password}"
-SECRET_KEY_DB="${SECRET_KEY_DB:-database}"
+SECRET_KEY_DB="${SECRET_KEY_DB:-dbname}"
 
 mkdir -p "$(dirname "$ENV_FILE")"
 

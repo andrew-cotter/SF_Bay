@@ -21,14 +21,25 @@ TEMP_YLIM = (48, 67.5)
 SOURCE_COLORS = {"Garmin": "blue", "NOAA": "teal"}
 XTICK_DOY = [1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335]
 XTICK_LABELS = [
-    "Jan-1", "Feb-1", "Mar-1", "Apr-1", "May-1", "Jun-1",
-    "Jul-1", "Aug-1", "Sep-1", "Oct-1", "Nov-1", "Dec-1",
+    "Jan-1",
+    "Feb-1",
+    "Mar-1",
+    "Apr-1",
+    "May-1",
+    "Jun-1",
+    "Jul-1",
+    "Aug-1",
+    "Sep-1",
+    "Oct-1",
+    "Nov-1",
+    "Dec-1",
 ]
 
 
 # -----------------------------------------------------------------------------
 # Data loading
 # -----------------------------------------------------------------------------
+
 
 def load_data():
     """Load and prepare NOAA + Garmin data; return main dataframe, daily stats, and outliers."""
@@ -47,11 +58,10 @@ def load_data():
 # Formatting helpers
 # -----------------------------------------------------------------------------
 
+
 def format_latest_reading(row):
     """Format the most recent reading as a short summary string."""
-    return (
-        f"{row['month']}-{row['day']}-{row['year']} at {row['time']} Pacific Time"
-    )
+    return f"{row['month']}-{row['day']}-{row['year']} at {row['time']} Pacific Time"
 
 
 def build_interval_data(daily_average, max_year=2026):
@@ -68,15 +78,16 @@ def build_interval_data(daily_average, max_year=2026):
 # UI: metrics and plot
 # -----------------------------------------------------------------------------
 
+
 def render_metrics(daily_average):
     """Render main metric (today's average) centered, then yesterday and 7 days ago on one row."""
     temp_col = "Mean"
-    
+
     last_date = daily_average["date"].iloc[-1]
     target_yesterday = last_date - pd.Timedelta(days=1)
     target_7_days_ago = last_date - pd.Timedelta(days=7)
     target_365_days_ago = last_date - pd.Timedelta(days=365)
-    
+
     def row_closest_to_date(df, target_date, date_col="date"):
         idx = (df[date_col] - target_date).abs().idxmin()
         return df.loc[idx]
@@ -128,6 +139,7 @@ def render_metrics(daily_average):
         unsafe_allow_html=True,
     )
 
+
 def plot_yearly_trends(daily_average, da2, interval_data, year):
     """Build matplotlib figure for yearly trends and selected year."""
     fig, ax = plt.subplots(figsize=(9, 6))
@@ -148,9 +160,10 @@ def plot_yearly_trends(daily_average, da2, interval_data, year):
         ]
         if not data.empty:
             plt.plot(
-                data["doy"], data["Mean"],
+                data["doy"],
+                data["Mean"],
                 color=SOURCE_COLORS[source],
-                label= f" {year}: {source}",
+                label=f" {year}: {source}",
                 alpha=0.7,
             )
 
@@ -170,13 +183,20 @@ def plot_yearly_trends(daily_average, da2, interval_data, year):
 # Main app
 # -----------------------------------------------------------------------------
 
+
 def main():
     st.set_page_config(
         layout="centered",
         page_title="San Francisco Bay Water Temperature",
         page_icon=":ocean:",
-        )
+    )
     st.write("## San Francisco Bay Water Temperature")
+    st.error(
+        "Thank you for visiting my app.  \n\n"
+        "Unfortunately, this app is deprecated as of 3/18/2026 due to a [change in the Garmin API](https://github.com/matin/garth/discussions/222)  "
+        "that blocks access to my own data.  \n\n"
+        "I've left the app up for posterity, but it will no longer be updated unless I find time to either migrate to a new data source or find a way to access my Garmin data again."
+    )
 
     d, daily_average, da2, outliers = load_data()
     latest = d.iloc[-1]
@@ -185,15 +205,14 @@ def main():
 
     render_metrics(daily_average)
     st.caption(
-        "Last measured " + format_latest_reading(latest),
-        text_alignment="center"
+        "Last measured " + format_latest_reading(latest), text_alignment="center"
     )
 
     st.markdown("---")
     st.write("## Yearly trends")
 
     interval_data = build_interval_data(daily_average, max_year=YEAR_MAX)
-    
+
     @st.fragment
     def year_slider():
         year = st.select_slider(
@@ -203,13 +222,13 @@ def main():
         )
         fig = plot_yearly_trends(daily_average, da2, interval_data, year)
         st.pyplot(fig)
-    
+
     year_slider()
 
     st.caption(
         "Data from [NOAA Tides & Currents](https://tidesandcurrents.noaa.gov/stationhome.html?id=9414290) "
         "and my personal [Garmin Watch](https://github.com/andrew-cotter/garmin_db).",
-        text_alignment="right"
+        text_alignment="right",
     )
 
 
